@@ -1,5 +1,6 @@
 import handlePlaceholder from './handle-placeholder';
 import MediaUploader from './helpers/media-uploader';
+import {renderUploadZone} from './video-block/uploadZone';
 
 let AddContentBtns = function() {
     this.top = $('.st-block-controls__top');
@@ -60,18 +61,19 @@ export default function videoBlock(SirTrevor, config) {
 
         onBlockRender: function() {
             let self = this;
-            let addContentBtns = new AddContentBtns();
+            // let addContentBtns = new AddContentBtns();
             let isAdmin = self.getOptions().isAdmin();
-            let uploadBlock = [
-                '<div class="row st-block__upload-container">',
-                '<div class="col-md-6">',
-                '<label onclick="$(this).next().trigger(\'click\');"' +
-                    'class="btn btn-default">Select from folder</label>',
-                '<input type="file" id="embedUploadFile">',
-                '<span class="btn btn--primary pull-right" id="updateButton">Update Credentials</span>',
-                '</div>',
-                '</div>',
-            ].join('\n');
+            const uploadZoneRoot = $(document.createElement('div'));
+            // let uploadBlock = [
+            //     '<div class="row st-block__upload-container">',
+            //     '<div class="col-md-6">',
+            //     '<label onclick="$(this).next().trigger(\'click\');"' +
+            //         'class="btn btn-default">Select from folder</label>',
+            //     '<input type="file" id="embedUploadFile">',
+            //     '<span class="btn btn--primary pull-right" id="updateButton">Update Credentials</span>',
+            //     '</div>',
+            //     '</div>',
+            // ].join('\n');
 
             // when rendering the block we need to check right away if the keys
             // for youtube uploading are already set, it not show the modal
@@ -85,7 +87,9 @@ export default function videoBlock(SirTrevor, config) {
             );
 
             self.$('.during-upload').hide();
-            self.$('.st-block__inputs').append(uploadBlock);
+            self.$('.st-block__inputs').append(uploadZoneRoot);
+            renderUploadZone(uploadZoneRoot.get(0));
+
             if (!isAdmin) {
                 self.$('#updateButton').hide();
             }
@@ -96,24 +100,24 @@ export default function videoBlock(SirTrevor, config) {
                 self.getOptions().displayModalBox(message);
             });
 
-            self.$('#embedUploadFile').on('change', function() {
-                let file = $(this).prop('files')[0];
+            // self.$('#embedUploadFile').on('change', function() {
+            //     let file = $(this).prop('files')[0];
 
-                if (!file) {
-                    return false;
-                }
+            //     if (!file) {
+            //         return false;
+            //     }
 
-                // Handle one upload at a time
-                if (/video/.test(file.type)) {
-                    self.loading();
+            //     // Handle one upload at a time
+            //     if (/video/.test(file.type)) {
+            //         self.loading();
 
-                    // Hide add content buttons while uploading
-                    addContentBtns.hide();
-                    self.$inputs.hide();
+            //         // Hide add content buttons while uploading
+            //         addContentBtns.hide();
+            //         self.$inputs.hide();
 
-                    self.uploadFile(file);
-                }
-            });
+            //         self.uploadFile(file);
+            //     }
+            // });
 
             const onEditorChange = () => {
                 const data = this.retrieveData();
@@ -166,6 +170,9 @@ export default function videoBlock(SirTrevor, config) {
                 file: file,
                 token: localStorage.getItem('accessToken'),
                 metadata: metadata,
+                params: {
+                    access_token: localStorage.getItem('accessToken'),
+                },
                 onError: function(data) {
                     let message = data;
 

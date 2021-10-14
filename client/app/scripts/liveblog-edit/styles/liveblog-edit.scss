@@ -71,7 +71,6 @@
         }
         .content--timeline {
             top: 48px !important;
-            //padding-top: $nav-height - 10px;
         }
         &--first {
             left: 0;
@@ -509,8 +508,10 @@
                                     min-width: 50%; white-space: nowrap;
                                 }
                             }
+
                             // padding
                             &__inner {padding: 0;}
+
                             &[data-type='quote'], &[data-type='image'], &[data-type='video'], &[data-type='embed'] {
                                 .st-block__inner {
                                     padding: 20px;
@@ -523,6 +524,11 @@
                                     }
                                 }
                             }
+
+                            &[data-type='video'] .st-block__inner {
+                                padding-top: 0px;
+                            }
+
                             &__inner {
                                 border: 0;
                                 margin: 8px 0;
@@ -776,9 +782,21 @@
         }
     }
 }
-.st-block__upload-container label {
-    min-height: 25px;
+.st-block__upload-container {
+    label {
+        min-height: 25px;
+    }
+
+    .video-preview {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+
+        video {
+            max-width: 100%;
+        }
+    }
 }
+
 
 // fix for the btns in editor
 .medium-editor-toolbar {
