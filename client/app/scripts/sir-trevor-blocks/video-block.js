@@ -88,7 +88,8 @@ export default function videoBlock(SirTrevor, config) {
 
             self.$('.during-upload').hide();
             self.$('.st-block__inputs').append(uploadZoneRoot);
-            renderYoutubeUpload(uploadZoneRoot.get(0));
+            renderYoutubeUpload(
+                uploadZoneRoot.get(0), {lbSettings: this.getOptions().liveblogSettings()});
 
             if (!isAdmin) {
                 self.$('#updateButton').hide();

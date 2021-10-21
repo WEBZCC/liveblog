@@ -6,7 +6,6 @@ import { UploadProgress } from './uploadProgress';
 import { UploadZone } from './uploadZone';
 
 interface IProps {
-    uploadVideo: (params: IUploadParams) => void;
     lbSettings: ILiveblogSettings;
 }
 
