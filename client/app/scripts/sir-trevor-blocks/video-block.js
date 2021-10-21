@@ -1,6 +1,6 @@
 import handlePlaceholder from './handle-placeholder';
 import MediaUploader from './helpers/media-uploader';
-import {renderUploadZone} from './video-block/uploadZone';
+import {renderYoutubeUpload} from './video-block/youtubeUpload';
 
 let AddContentBtns = function() {
     this.top = $('.st-block-controls__top');
@@ -88,7 +88,7 @@ export default function videoBlock(SirTrevor, config) {
 
             self.$('.during-upload').hide();
             self.$('.st-block__inputs').append(uploadZoneRoot);
-            renderUploadZone(uploadZoneRoot.get(0));
+            renderYoutubeUpload(uploadZoneRoot.get(0));
 
             if (!isAdmin) {
                 self.$('#updateButton').hide();
@@ -147,16 +147,14 @@ export default function videoBlock(SirTrevor, config) {
                 }
             });
         },
-        uploadFile: function(file) {
+        uploadFile: function(params) {
             const lbSettings = this.getOptions().liveblogSettings();
             let self = this;
             let uploadStartTime = 0;
-            let title = 'liveblog-' + Math.random().toString(36)
-                .substr(2, 5);
             let metadata = {
                 snippet: {
-                    title: title,
-                    description: '',
+                    title: params.title,
+                    description: params.description,
                     tags: ['youtube-cors-upload'],
                     categoryId: 22,
                 },
@@ -167,7 +165,7 @@ export default function videoBlock(SirTrevor, config) {
             let addContentBtns = new AddContentBtns();
             let uploader = new MediaUploader({
                 baseUrl: 'https://www.googleapis.com/upload/youtube/v3/videos',
-                file: file,
+                file: params.file,
                 token: localStorage.getItem('accessToken'),
                 metadata: metadata,
                 params: {

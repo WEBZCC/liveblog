@@ -1,18 +1,27 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { VideoPreview } from './videoPreview';
 
-interface IProps {
+interface IUploadParams {
+    title: string;
+    description: string;
+    videoFile: File;
+}
 
+interface IProps {
+    uploadVideo: (params: IUploadParams) => void;
 }
 
 interface IState {
     videoFile: File;
 }
 
-class UploadZone extends React.Component<IProps, IState> {
+export class UploadZone extends React.Component<IProps, IState> {
     videoInput: HTMLInputElement;
+    pickFileButton: HTMLButtonElement;
     uploadButton: HTMLButtonElement;
+
+    title: HTMLDivElement;
+    description: HTMLDivElement;
 
     constructor(props) {
         super(props);
@@ -27,11 +36,22 @@ class UploadZone extends React.Component<IProps, IState> {
             this.setState({ videoFile: files[0] });
     }
 
+    onUploadToYoutubeClicked = () => {
+        const params: IUploadParams = {
+            title: $(this.title).text(),
+            description: $(this.description).text(),
+            videoFile: this.state.videoFile,
+        };
+
+        this.props.uploadVideo(params);
+    }
+
     componentDidMount = () => {
         // NOTE: Wondering why I wired the click event that way?
         // Well, the dang SirTrevor SimpleBlock code has a bind with stopPropagation
         // therefore it's eating React onClick events bind for some reason
-        $(this.uploadButton).on('click', () => $(this.videoInput).trigger('click'));
+        $(this.pickFileButton).on('click', () => $(this.videoInput).trigger('click'));
+        $(this.uploadButton).on('click', this.onUploadToYoutubeClicked);
     }
 
     render() {
@@ -39,7 +59,7 @@ class UploadZone extends React.Component<IProps, IState> {
             <div className="row st-block__upload-container">
                 <div className="col-12">
                     <button
-                        ref={(e) => this.uploadButton = e}
+                        ref={(e) => this.pickFileButton = e}
                         className="btn btn-default"
                         type="button"
                     >
@@ -52,12 +72,33 @@ class UploadZone extends React.Component<IProps, IState> {
                     />
 
                     <VideoPreview videoFile={this.state.videoFile} />
+
+                    <div className="item--embed__info">
+                        <div
+                            className="st-embed-block item--embed__title title-preview"
+                            contentEditable={true}
+                            placeholder="Add a title"
+                            ref={(el) => this.title = el}
+                        />
+
+                        <div
+                            className="st-embed-block item--embed__description description-preview"
+                            contentEditable={true}
+                            placeholder="Add a description"
+                            ref={(el) => this.description = el}
+                        />
+                    </div>
+
+                    <button
+                        disabled={!this.state.videoFile}
+                        ref={(el) => this.uploadButton = el}
+                        type="button"
+                        className="btn btn--primary pull-right"
+                    >
+                        Upload to Youtube
+                    </button>
                 </div>
             </div>
         );
     }
 }
-
-export const renderUploadZone = (mountPoint: HTMLElement) => {
-    ReactDOM.render(<UploadZone />, mountPoint);
-};
