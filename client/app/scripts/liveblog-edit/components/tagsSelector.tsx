@@ -40,7 +40,7 @@ export const destroyTagsSelector = (element: HTMLDivElement) => {
 
 const renderTagsSelector = (
     element: HTMLDivElement, props: IProps) => {
-    ReactDOM.render(<TagsSelector { ...props } />, element);
+    ReactDOM.render(<TagsSelector {...props} />, element);
 };
 
 export default renderTagsSelector;
