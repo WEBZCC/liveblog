@@ -43,8 +43,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - uses: nanasess/setup-chromedriver@master
-      with:
-        chromedriver-version: '97.0.4692.36'
 
     - name: Cache node modules
       uses: actions/cache@v2
