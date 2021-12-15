@@ -1,6 +1,6 @@
 name: Liveblog CI
 
-on: [push, pull_request]
+on: [push]
 
 jobs:
   build:
@@ -41,22 +41,49 @@ jobs:
           - 9200:9200
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
+    - uses: nanasess/setup-chromedriver@master
 
-    - name: Setup Nodejs 8.x
+    - name: Cache node modules
+      uses: actions/cache@v2
+      env:
+        cache-name: cache-node-modules
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('./client/package.json') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
+
+    - name: Cache pip modules
+      uses: actions/cache@v2
+      env:
+        cache-name: cache-pip-modules
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('./server/dev-requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
+
+    - name: Setup Nodejs 10.x
       uses: actions/setup-node@v1
       with:
-        node-version: 8.x
+        node-version: 10.x
 
-    - name: Setup Python 3.5
-      uses: actions/setup-python@v1
+    - name: Setup Python 3.6.x
+      uses: actions/setup-python@v2
       with:
-        python-version: 3.5
+        python-version: 3.6.x
         architecture: x64
 
     - name: Install Python dependencies and run tests
       working-directory: ./server
       run: |
+        pip install 'pip<=20.2.3'
+        pip install 'setuptools<50'
         pip install -r dev-requirements.txt
         nosetests --all-modules --nocapture
         behave --format progress2 --logging-level ERROR
@@ -85,17 +112,17 @@ jobs:
         (nohup honcho start &)
         (nohup sudo python -m smtpd -n -c DebuggingServer localhost:2225 &)
 
-    - name: Build client and run end to end tests
+    - name: Build client and run e2e tests
       working-directory: ./client
       run: |
         grunt build --server='http://localhost:5000/api' --ws='ws://localhost:5100'
         cd dist
         while [ ! -f index.html ]; do sleep .5; done
         (nohup python -m http.server 9000 &)
-        cd ../
-        export DISPLAY=:99.0
-        /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -ac -screen 0 1920x1080x24
-        export CHROME_BIN=`which google-chrome`
+        export DISPLAY=:99
+        export SELENIUM_ADDRESS='http://localhost:4444/wd/hub'
+        chromedriver --port=4444 --url-base=/wd/hub &
+        sudo Xvfb -ac :99 -screen 0 1920x1080x24 > /dev/null 2>&1 &
         $CHROME_BIN --version
-        CHROMEDRIVER_VERSION=85.0.4183.87 npm run webdriver-update
+        cd ../
         npm run e2e
